@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        table { margin: auto; border-collapse: collapse; width: 50%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        input { width: 60px; text-align: center; }
+        button { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    
+    <!-- Bill Calculator Section -->
+<div id="billCalculator">
+    <h2>Bill Calculator</h2>
+    
+    <label for="day">Select Day:</label>
+    <select id="day">
+        <option value="monday">Monday</option>
+        <option value="tuesday">Tuesday</option>
+        <option value="wednesday">Wednesday</option>
+        <option value="thursday">Thursday</option>
+        <option value="friday">Friday</option>
+        <option value="saturday">Saturday</option>
+        <option value="sunday">Sunday</option>
+    </select>
+
+    <table>
+        <tr>
+            <th>Item</th>
+            <th>Issued</th>
+            <th>Returned</th>
+        </tr>
+        <tr>
+            <td>SAKSHI</td>
+            <td><input type="number" id="issued1" value="0"></td>
+            <td><input type="number" id="returns1" value="0"></td>
+        </tr>
+        <tr>
+            <td>NAMASTE TG</td>
+            <td><input type="number" id="issued2" value="0"></td>
+            <td><input type="number" id="returns2" value="0"></td>
+        </tr>
+        <tr>
+            <td>TIMES OF INDIA</td>
+            <td><input type="number" id="issued3" value="0"></td>
+            <td><input type="number" id="returns3" value="0"></td>
+        </tr>
+        <tr>
+            <td>ET</td>
+            <td><input type="number" id="issued4" value="0"></td>
+            <td><input type="number" id="returns4" value="0"></td>
+        </tr>
+        <tr>
+            <td>EENADU</td>
+            <td><input type="number" id="issued5" value="0"></td>
+            <td><input type="number" id="returns5" value="0"></td>
+        </tr>
+    </table>
+
+    <div class="buttons">
+        <button onclick="calculateBill()">Calculate</button>
+        <button onclick="clearAll()">All Clear</button>
+    </div>
+
+    <h2>Total Bill: <span id="result">0</span></h2>
+</div>
+
+<!-- Manual Calculator Section -->
+<div id="manualCalculator">
+    <h3>Manual Calculation:</h3>
+    <input type="text" id="calcInput" placeholder="Enter expression" style="width: 300px; height: 40px; font-size: 18px;">
+
+    <div class="numpad">
+        <button onclick="appendValue('7')">7</button>
+        <button onclick="appendValue('8')">8</button>
+        <button onclick="appendValue('9')">9</button>
+        
+        <button onclick="appendValue('4')">4</button>
+        <button onclick="appendValue('5')">5</button>
+        <button onclick="appendValue('6')">6</button>
+        
+        <button onclick="appendValue('1')">1</button>
+        <button onclick="appendValue('2')">2</button>
+        <button onclick="appendValue('3')">3</button>
+
+        <button onclick="appendValue('0')">0</button>
+        <button onclick="appendValue('.')">.</button>
+        <button onclick="clearExpression()">C</button>
+
+        <button onclick="appendValue('+')">+</button>
+        <button onclick="appendValue('-')">-</button>
+        <button onclick="appendValue('*')">*</button>
+        <button onclick="appendValue('/')">/</button>
+
+        <button onclick="evaluateExpression()" style="grid-column: span 2;">Enter</button>
+    </div>
+
+    <button onclick="evaluateExpression()">Calculate Expression</button>
+    <h2>Result: <span id="calcResult">0</span></h2>
+</div>
+
+<style>
+    #billCalculator, #manualCalculator {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .numpad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        width: 160px;
+        margin: 20px auto;
+    }
+
+    .numpad button {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+</style>
+    <script>
+        const priceData = {
+            monday: [3.95, 4.95, 2.80, 4.00, 4.95],
+            tuesday: [3.95, 4.95, 2.80, 4.00, 4.95],
+            wednesday: [3.95, 4.95, 3.5, 4.00, 4.95],
+            thursday: [3.95, 4.95, 3.5, 4.00, 4.95],
+            friday: [3.95, 4.95, 3.5, 4.00, 4.95],
+            saturday: [3.95, 4.95, 3.5, 8.50, 4.95],
+            sunday: [5.1, 6.1, 3.5, 8.5, 6.1]
+        };
+
+        function calculateBill() {
+            let day = document.getElementById("day").value;
+            let issued = [
+                Number(document.getElementById("issued1").value),
+                Number(document.getElementById("issued2").value),
+                Number(document.getElementById("issued3").value),
+                Number(document.getElementById("issued4").value),
+                Number(document.getElementById("issued5").value)
+            ];
+            let returns = [
+                Number(document.getElementById("returns1").value),
+                Number(document.getElementById("returns2").value),
+                Number(document.getElementById("returns3").value),
+                Number(document.getElementById("returns4").value),
+                Number(document.getElementById("returns5").value)
+            ];
+
+            let bill = 0;
+            for (let i = 0; i < issued.length; i++) {
+                let currentDayPrices = priceData[day];
+                let previousDayPrices;
+                
+                switch (day) {
+                    case 'monday': previousDayPrices = priceData['sunday']; break;
+                    case 'tuesday': previousDayPrices = priceData['monday']; break;
+                    case 'wednesday': previousDayPrices = priceData['tuesday']; break;
+                    case 'thursday': previousDayPrices = priceData['wednesday']; break;
+                    case 'friday': previousDayPrices = priceData['thursday']; break;
+                    case 'saturday': previousDayPrices = priceData['friday']; break;
+                    case 'sunday': previousDayPrices = priceData['saturday']; break;
+                    default: return;
+                }
+
+                bill += (issued[i] * currentDayPrices[i]) - (returns[i] * previousDayPrices[i]);
+            }
+
+            document.getElementById("result").innerText = bill.toFixed(2);
+        }
+        
+    document.addEventListener("DOMContentLoaded", function() {
+        let inputs = document.querySelectorAll("input[type='number']");
+        
+        inputs.forEach((input, index) => {
+            input.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Prevent form submission
+                    let nextInput = inputs[index + 1];
+                    if (nextInput) {
+                        nextInput.focus(); // Move focus to next input
+                    } else {
+                        document.querySelector("button").focus(); // If last input, focus on button
+                    }
+                }
+            });
+        });
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        let inputs = document.querySelectorAll("input[type='number']");
+        
+        inputs.forEach(input => {
+            input.addEventListener("focus", function() {
+                if (this.value === "0") this.value = ""; // Clear default zero
+            });
+
+            input.addEventListener("blur", function() {
+                if (this.value === "") this.value = "0"; // Restore zero if left empty
+            });
+
+            input.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Prevent form submission
+                    let nextInput = inputs[[...inputs].indexOf(this) + 1];
+                    if (nextInput) {
+                        nextInput.focus(); // Move focus to next input
+                    } else {
+                        document.querySelector("button").focus(); // If last input, focus on button
+                    }
+                }
+            });
+        });
+    });
+    function clearAll() {
+        let inputs = document.querySelectorAll("input[type='number']");
+        inputs.forEach(input => input.value = "0");
+        document.getElementById("result").innerText = "0";
+    }
+    
+        function appendValue(value) {
+        document.getElementById("calcInput").value += value;
+    }
+
+    function clearExpression() {
+        document.getElementById("calcInput").value = "";
+    }
+
+    function evaluateExpression() {
+        let expression = document.getElementById("calcInput").value;
+        try {
+            document.getElementById("calcResult").innerText = eval(expression).toFixed(2);
+        } catch {
+            document.getElementById("calcResult").innerText = "Error";
+        }
+    }
+
+    function clearAll() {
+        // Clear bill calculator inputs
+        document.querySelectorAll("input[type='number']").forEach(input => input.value = "0");
+        document.getElementById("result").innerText = "0";
+
+        // Clear manual calculation inputs
+        document.getElementById("calcInput").value = "";
+        document.getElementById("calcResult").innerText = "0";
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+        document.getElementById("day").value = today;
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let inputs = document.querySelectorAll("input[type='number']");
+        
+        inputs.forEach(input => {
+            input.addEventListener("focus", function() {
+                if (this.value === "0") this.value = ""; // Clear default zero
+            });
+
+            input.addEventListener("blur", function() {
+                if (this.value === "") this.value = "0"; // Restore zero if left empty
+            });
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(() => { // Ensures the dropdown is fully loaded before setting the value
+            const today = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+            document.getElementById("day").value = today;
+        }, 100); // Delay for reliability
+    });
+
+
+    </script>
+
+</body>
+</html>
